@@ -15,7 +15,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.control.TextInputDialog;
 import java.util.Optional;
 import javafx.scene.web.WebView;
-// import java.io.File;
 import java.io.IOException;
 import javafx.stage.Stage;
 
