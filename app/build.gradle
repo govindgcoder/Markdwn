@@ -20,7 +20,7 @@ application {
 
 dependencies {
     // Markdown parsing
-    implementation 'org.commonmark:commonmark:0.21.0'
+    implementation 'org.commonmark:commonmark:0.27.1'
     // JSON parsing for Gemini API
     implementation 'com.google.code.gson:gson:2.10.1'
 }
