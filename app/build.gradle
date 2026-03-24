@@ -1,0 +1,26 @@
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+// for javafx implementation
+javafx {
+    version = "21"
+    modules = [ 'javafx.controls', 'javafx.web' ]
+}
+
+// application main file
+application {
+    mainClass = 'org.markdwn.MainApp'
+}
+
+dependencies {
+    // Markdown parsing
+    implementation 'org.commonmark:commonmark:0.21.0'
+    // JSON parsing for Gemini API
+    implementation 'com.google.code.gson:gson:2.10.1'
+}
