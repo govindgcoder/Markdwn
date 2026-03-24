@@ -14,6 +14,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import java.io.File;
+import java.io.IOException;
 import javafx.stage.Stage;
 
 // for markdown
@@ -26,6 +27,7 @@ import javafx.util.Duration;
 public class MainApp extends Application {
 
     private Path dirPath;
+    private Path currentActiveFile;
 
     private void loadDirectory(Path dirPath, ListView<String> sideBar) {
         sideBar.getItems().clear();
@@ -76,8 +78,17 @@ public class MainApp extends Application {
         
         // button functionalities
         Button newBtn = new Button("New");
+        
+        
+        // save function
         Button saveBtn = new Button("Save");
-
+        saveBtn.setOnAction(e -> {
+            if(currentActiveFile == null) return;
+            try {
+                Files.writeString(currentActiveFile, input.getText());
+            } catch (IOException ex){}
+        });
+        
         // for the appbar
         ToolBar appBar = new ToolBar(
             new Label("File name"),
@@ -107,6 +118,7 @@ public class MainApp extends Application {
                     try {
                         // select the file
                         Path filePath = dirPath.resolve(newVal);
+                        currentActiveFile = filePath;
                         // get content
                         String content = Files.readString(filePath);
                         input.setText(content);
