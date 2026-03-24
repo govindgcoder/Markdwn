@@ -13,12 +13,10 @@ import java.util.concurrent.CompletableFuture;
 public class GeminiHelper {
 
     // Usage:
-    // String result;
     // new Thread(() -> {
-    //     result = helper.getResponse("Explain gravity").get();
-    // }).start();
-
-    //
+    //    String result = helper.getResponse("Explain gravity").get();
+    //    Platform.runLater(() -> label.setText(result)); Or do something similar (update the ui when done) cuz .get() is blocking
+    //}).start();
 
 
     // Base Gemini API url
