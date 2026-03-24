@@ -2,12 +2,14 @@ package org.markdwn;
 
 // all imports
 
+// import org.markdwn.FileHelper;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.web.WebView;
-import javafx.stage.DirectoryChooser;
+// import javafx.stage.DirectoryChooser;
 import java.io.File;
 import javafx.stage.Stage;
 import javafx.scene.layout.BorderPane;
@@ -39,6 +41,7 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
+        FileHelper fileHelper = new FileHelper();
         // sideBar
         ListView<String> sideBar = new ListView<>();
 
@@ -47,15 +50,9 @@ public class MainApp extends Application {
 
         // to display formatted
         WebView output = new WebView();
-        
-        // for selecting folder we use DirectoryChooser
-        DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setTitle("Select a Directory");
-    
+
         // for set initial directory
-        directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-    
-        File selectedDirectory = directoryChooser.showDialog(stage);
+        File selectedDirectory = fileHelper.directorySelector(stage);
     
         if (selectedDirectory != null) {
             dirPath = Paths.get(selectedDirectory.getAbsolutePath());
