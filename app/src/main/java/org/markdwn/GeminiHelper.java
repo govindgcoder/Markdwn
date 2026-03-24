@@ -13,8 +13,9 @@ import java.util.concurrent.CompletableFuture;
 public class GeminiHelper {
 
     // Usage:
+    // String result;
     // new Thread(() -> {
-    //     String result = helper.getResponse("Explain gravity").get();
+    //     result = helper.getResponse("Explain gravity").get();
     // }).start();
 
     //
