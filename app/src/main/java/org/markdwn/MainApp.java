@@ -12,6 +12,8 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.control.TextInputDialog;
+import java.util.Optional;
 import javafx.scene.web.WebView;
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +80,26 @@ public class MainApp extends Application {
         
         // button functionalities
         Button newBtn = new Button("New");
-        
+        newBtn.setOnAction(e -> {
+            TextInputDialog dialog = new TextInputDialog("new file");
+            dialog.setTitle("New File?");
+            dialog.setHeaderText("Enter file name");
+            dialog.setContentText("file name...");
+            // Show the dialog and wait for the user's response
+            Optional<String> result = dialog.showAndWait();
+            
+            // Process the result if it is present (user clicked 'OK')
+            result.ifPresent(name -> {
+                Path newFilePath = dirPath.resolve(name);
+                try {
+                Files.writeString(newFilePath, "");
+                } catch (IOException ev){}
+                
+                currentActiveFile = newFilePath;
+                input.setText("");
+                loadDirectory(dirPath, sideBar);
+            });
+        });
         
         // save function
         Button saveBtn = new Button("Save");
