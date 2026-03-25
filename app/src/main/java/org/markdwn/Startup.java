@@ -11,6 +11,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView; // Added this import
 
 public class Startup {
 
@@ -22,14 +23,33 @@ public class Startup {
         popup.initOwner(ownerStage);
         popup.setTitle("Markdwn");
 
-        Label message = new Label("Welcome! Select a folder to begin.");
+        // --- Logo Setup ---
+        ImageView logoView = new ImageView();
+        try {
+            // Reusing your existing icon.png for the center logo
+            Image logoImage = new Image(getClass().getResourceAsStream("/icon.png"));
+            logoView.setImage(logoImage);
+            
+            // Constrain the size so it looks like a clean, modern logo
+            logoView.setFitWidth(80); 
+            logoView.setFitHeight(80);
+            logoView.setPreserveRatio(true);
+            logoView.setSmooth(true);
+        } catch (Exception e) {
+            System.err.println("Warning: icon.png not found for startup logo.");
+        }
+        // ------------------
+
+        Label message = new Label("Welcome! Select a folder to begin!");
         Button startBtn = new Button("Open Folder");
 
-        VBox layout = new VBox(20, message, startBtn);
+        // Add logoView as the first element in the VBox
+        VBox layout = new VBox(20, logoView, message, startBtn);
         layout.setAlignment(Pos.CENTER);
         layout.setStyle("-fx-padding: 40;");
 
-        Scene scene = new Scene(layout, 350, 200);
+        // Increased height slightly from 200 to 280 to accommodate the image gracefully
+        Scene scene = new Scene(layout, 350, 280);
 
         try {
             String css = getClass().getResource("/style.css").toExternalForm();
@@ -53,7 +73,10 @@ public class Startup {
             directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
 
             selectedDirectory = directoryChooser.showDialog(ownerStage);
-            popup.close();
+            // Only close if they actually selected a directory (avoids crashing if they hit cancel)
+            if (selectedDirectory != null) {
+                popup.close();
+            }
         });
 
         popup.showAndWait();
