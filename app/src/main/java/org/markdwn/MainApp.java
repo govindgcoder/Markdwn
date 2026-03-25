@@ -48,6 +48,26 @@ public class MainApp extends Application {
 
     private Path dirPath;
     private Path currentActiveFile;
+    
+    private Stage createLoadingDialog(Stage owner, String message) {
+        Stage loadingStage = new Stage();
+        loadingStage.initOwner(owner);
+        loadingStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+        loadingStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+    
+        ProgressIndicator spinner = new ProgressIndicator();
+        
+        Label msgLabel = new Label(message);
+        
+        javafx.scene.layout.VBox vbox = new javafx.scene.layout.VBox(10, spinner, msgLabel);
+        vbox.setStyle("-fx-padding: 20; -fx-background-color: white; -fx-border-color: gray; -fx-border-width: 2;");
+        vbox.setAlignment(javafx.geometry.Pos.CENTER);
+    
+        Scene scene = new Scene(vbox);
+        loadingStage.setScene(scene);
+        
+        return loadingStage;
+    }
 
     private void loadDirectory(Path dirPath, TreeView<String> sideBar) {
         sideBar.getRoot().getChildren().clear();
@@ -154,9 +174,9 @@ public class MainApp extends Application {
         HBox.setHgrow(spacer, Priority.ALWAYS);
         
         //for ai functionalitie
-        Button setAPIKeyBtn = new Button("Set API Key");
+        Button setAPIKeyBtn = new Button("Set Gemini API Key");
         setAPIKeyBtn.setOnAction(e->{
-            TextInputDialog dialog = new TextInputDialog("Set API Key");
+            TextInputDialog dialog = new TextInputDialog("Set Gemini API Key");
             dialog.setTitle("Set API Key");
             dialog.setHeaderText("enter API Key:");
             dialog.setContentText("");
@@ -181,10 +201,12 @@ public class MainApp extends Application {
             appBar.setDisable(true);
         
             NlpClassifierService service = new NlpClassifierService(apiKey, dirPath);
-        
+            Stage loadingDialog = createLoadingDialog(stage, "AI is processing...");
+            loadingDialog.show();
             service.categorizeFiles()
                 .thenAccept(categoryMap -> {
                     Platform.runLater(() -> {
+                        loadingDialog.close();
                         rootItem.getChildren().clear();
                         if (categoryMap == null) return;
                         for (Map.Entry<String, List<String>> entry : categoryMap.entrySet()) {
@@ -205,6 +227,7 @@ public class MainApp extends Application {
                 })
                 .exceptionally(ex -> {
                     Platform.runLater(() -> {
+                        loadingDialog.close();
                         Alert alert = new Alert(Alert.AlertType.ERROR, "NLP classification failed: " + ex.getMessage());
                         alert.showAndWait();
                     });
@@ -236,10 +259,13 @@ public class MainApp extends Application {
                 sideBar.setDisable(true);
                 input.setText("Loading... Please Wait!");
                 appBar.setDisable(true);
+                Stage loadingDialog = createLoadingDialog(stage, "AI is processing...");
+                loadingDialog.show();
                 helper.getResponse(prompt)
                       .thenAccept(resultVal -> {
                           // This block automatically runs when the network call finishes
                           Platform.runLater(() -> input.setText(resultVal));
+                          loadingDialog.close();
                           // create new file and paste result
                           sideBar.setDisable(false);
                           appBar.setDisable(false);
@@ -259,6 +285,7 @@ public class MainApp extends Application {
                       .exceptionally(ex -> {
                           // This catches any network/JSON errors seamlessly
                           Platform.runLater(() -> {
+                              loadingDialog.close();
                               Alert alert = new Alert(Alert.AlertType.ERROR, "API Error: " + ex.getMessage());
                               alert.showAndWait();
                               sideBar.setDisable(false);
