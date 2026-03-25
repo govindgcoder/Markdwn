@@ -25,7 +25,11 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 
+import org.markdwn.GeminiHelper;
+
 public class MainApp extends Application {
+    
+    private String apiKey = null;
 
     private Path dirPath;
     private Path currentActiveFile;
@@ -116,13 +120,81 @@ public class MainApp extends Application {
             }
         });
         
+        //for ai functionalitie
+        Button setAPIKeyBtn = new Button("Set API Key");
+        setAPIKeyBtn.setOnAction(e->{
+            TextInputDialog dialog = new TextInputDialog("Set API Key");
+            dialog.setTitle("Set API Key");
+            dialog.setHeaderText("enter API Key:");
+            dialog.setContentText("");
+            // Show the dialog and wait for the user's response
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(key -> {
+                this.apiKey = key;
+            });
+            
+        });
+        
+        Button nlpBtn = new Button("NLP classification");
+        
+        Button roadmapBtn = new Button("Roadmap Generator");
+        roadmapBtn.setOnAction(e -> {
+            if (apiKey == null) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Please set API Key first");
+                alert.showAndWait();
+                return;
+            }
+
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Roadmap Generator");
+            dialog.setHeaderText("Enter Topic for Roadmap");
+            dialog.setContentText("Topic for Roadmap:");
+            
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(topic -> {
+                GeminiHelper helper = new GeminiHelper(apiKey);
+                String prompt = "Create a detailed roadmap in markdown format (no emojies, pure markdown format) for learning: " + topic;
+                // asynchronous helper call uses Java's built-in ForkJoin pool.
+                helper.getResponse(prompt)
+                      .thenAccept(resultVal -> {
+                          // This block automatically runs when the network call finishes
+                          Platform.runLater(() -> input.setText(resultVal));
+                      })
+                      .exceptionally(ex -> {
+                          // This catches any network/JSON errors seamlessly
+                          Platform.runLater(() -> {
+                              Alert alert = new Alert(Alert.AlertType.ERROR, "API Error: " + ex.getMessage());
+                              alert.showAndWait();
+                          });
+                          return null;
+                    });
+                // create new file and paste result
+                String name = topic+".md";
+                Path newFilePath = dirPath.resolve(name);
+                try {
+                Files.writeString(newFilePath, "");
+                } catch (IOException ev){
+                    // Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save file: " + ex.getMessage());
+                    // alert.showAndWait();
+                }
+                
+                currentActiveFile = newFilePath;
+                loadDirectory(dirPath, sideBar);
+            });
+        });
+
+        
         // for the appbar
         ToolBar appBar = new ToolBar(
             new Label("File name"),
             new Separator(),
             newBtn,
             new Separator(),
-            saveBtn
+            saveBtn,
+            new Separator(),
+            setAPIKeyBtn,
+            nlpBtn,
+            roadmapBtn
         );
 
         SplitPane splitPane = new SplitPane();
