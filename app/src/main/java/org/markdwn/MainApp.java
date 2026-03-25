@@ -298,28 +298,7 @@ public class MainApp extends Application {
 
         // Pomodoro
         MenuButton menuButton = new MenuButton("Pomodoro Timer", null, pomoStart, pomoStop, pomoReset);
-        // pomoStart.setOnAction(e -> {
-        //     Thread pstart = new Thread(() -> {
-        //         pomo.runPomo(pomoLabel);
-        //     });
-        //     pstart.setDaemon(true);
-        //     pstart.start();
-        //     pomoStop.setDisable(false);
-        // });
-
-        // pomoStop.setOnAction(event -> {
-        //     pomo.stop(); // This kills the loop inside runPomo
-        //     pomo.reset(pomoLabel);
-        //     pomoRunning = false;
-        // });
-
-        // pomoReset.setOnAction(e -> {
-        //     pomo.reset(pomoLabel);
-        //     pomoRunning = false;
-        //     pomoReset.setDisable(true);
-        //     pomoStop.setDisable(true);
-        // });
-
+        
         pomoStart.setOnAction(e -> {
             if (!pomo.isRunning) { // Prevent multiple threads from starting
                 pomoStop.setDisable(false);
@@ -336,6 +315,8 @@ public class MainApp extends Application {
 
         pomoReset.setOnAction(e -> {
             pomo.reset(pomoLabel);
+            pomoReset.setDisable(true);
+            pomoStop.setDisable(true);
         });
 
         // for the appbar
