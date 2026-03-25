@@ -89,7 +89,10 @@ public class MainApp extends Application {
         Node document = parser.parse(markdownText);
         HtmlRenderer renderer = HtmlRenderer.builder().build();
         String html = renderer.render(document);
-        String finalHtml = "<html><body>" + html + "</body></html>";
+        
+        String style = "<style>body { font-family: 'Segoe UI', sans-serif; padding: 20px; color: #333; background-color: #fff; border-radius: 12px; }</style>";
+        
+        String finalHtml = "<html><head>" + style + "</head><body>" + html + "</body></html>";
         return finalHtml;
     }
 

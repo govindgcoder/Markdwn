@@ -1,33 +1,81 @@
 
-.button {
-    -fx-background-radius: 6;
-    -fx-border-radius: 6;
-    -fx-border-color: #cccccc;
-    -fx-border-width: 1.5;
-    -fx-padding: 6 12;
-    -fx-background-color: #ffffff;
-    -fx-cursor: hand;
-}
-
-.button:hover {
-    -fx-background-color: #f0f0f0;
-    -fx-border-color: #bbbbbb;
+.root {
+    -fx-background-color: #f3f4f6;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
 .tool-bar {
-    -fx-background-color: #fafafa;
-    -fx-border-color: #e0e0e0;
-    -fx-border-width: 0 0 2 0;
-    -fx-padding: 8 12;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 16;
 }
 
-.text-area, .tree-view {
-    -fx-border-color: #e0e0e0;
+.button, .menu-button {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #d1d5db;
+    -fx-border-width: 1;
+    -fx-padding: 6 14;
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #374151;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.button:hover, .menu-button:hover {
+    -fx-background-color: #f9fafb;
+    -fx-border-color: #9ca3af;
+}
+
+.menu-item {
+    -fx-padding: 8 20;
+}
+.menu-item:focused {
+    -fx-background-color: #e5e7eb;
+}
+
+.tree-view, .text-area, .web-view {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: #e5e7eb;
     -fx-border-width: 1.5;
-    -fx-background-radius: 4;
-    -fx-border-radius: 4;
+    /* Soft shadow effect */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);
+}
+
+.text-area {
+    -fx-control-inner-background: #ffffff;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 14px;
+    -fx-padding: 5;
+}
+.text-area .content {
+    -fx-background-radius: 12;
+}
+
+.tree-view {
+    -fx-background-color: #ffffff;
+    -fx-padding: 8;
+}
+
+.tree-cell {
+    -fx-background-radius: 6;
+    -fx-padding: 6 8;
+    -fx-font-size: 13px;
+    -fx-text-fill: #4b5563;
+}
+.tree-cell:selected {
+    -fx-background-color: #e5e7eb; 
+    -fx-text-fill: #111827;
+    -fx-font-weight: bold;
 }
 
 .split-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 16; 
+}
+.split-pane > .split-pane-divider {
+    -fx-padding: 0 6 0 6;
     -fx-background-color: transparent;
 }
