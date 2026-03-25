@@ -29,8 +29,6 @@ public class MainApp extends Application {
 
     private Path dirPath;
     private Path currentActiveFile;
-    // default api key for gemini features
-    private static final String DEFAULT_GEMINI_API_KEY = "AIzaSyCqyHBkXPXpr2rR-JAVwgncIdpKeHjg6Y8";
 
     private void loadDirectory(Path dirPath, ListView<String> sideBar) {
         sideBar.getItems().clear();
@@ -58,7 +56,6 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        // helper for directory related work
         FileHelper fileHelper = new FileHelper();
         // sideBar
         ListView<String> sideBar = new ListView<>();
@@ -111,30 +108,6 @@ public class MainApp extends Application {
                 Files.writeString(currentActiveFile, input.getText());
             } catch (IOException ex){}
         });
-
-        // button for roadmap generator window
-        Button roadmapBtn = new Button("Roadmap Generator");
-        roadmapBtn.setOnAction(e -> {
-            RoadmapGenerator roadmapGenerator = new RoadmapGenerator(DEFAULT_GEMINI_API_KEY);
-            roadmapGenerator.showWindow(stage, dirPath);
-        });
-
-        // basic placeholder button for future nlp feature
-        Button nlpBtn = new Button("NLP");
-        nlpBtn.setOnAction(e -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("NLP");
-            alert.setHeaderText("NLP feature");
-            alert.setContentText("This button is added. Logic can be added later.");
-            alert.showAndWait();
-        });
-
-        // button for simple pomodoro window
-        Button pomodoroBtn = new Button("Pomodoro");
-        pomodoroBtn.setOnAction(e -> {
-            Pomodoro pomodoro = new Pomodoro();
-            pomodoro.showWindow(stage);
-        });
         
         // for the appbar
         ToolBar appBar = new ToolBar(
@@ -142,13 +115,7 @@ public class MainApp extends Application {
             new Separator(),
             newBtn,
             new Separator(),
-            saveBtn,
-            new Separator(),
-            roadmapBtn,
-            new Separator(),
-            nlpBtn,
-            new Separator(),
-            pomodoroBtn
+            saveBtn
         );
 
         SplitPane splitPane = new SplitPane();
