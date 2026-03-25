@@ -90,10 +90,14 @@ public class MainApp extends Application {
             
             // Process the result if it is present (user clicked 'OK')
             result.ifPresent(name -> {
+                if (!name.endsWith(".md")) { name += ".md"; }
                 Path newFilePath = dirPath.resolve(name);
                 try {
                 Files.writeString(newFilePath, "");
-                } catch (IOException ev){}
+                } catch (IOException ev){
+                    // Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save file: " + ex.getMessage());
+                    // alert.showAndWait();
+                }
                 
                 currentActiveFile = newFilePath;
                 input.setText("");
@@ -107,7 +111,10 @@ public class MainApp extends Application {
             if(currentActiveFile == null) return;
             try {
                 Files.writeString(currentActiveFile, input.getText());
-            } catch (IOException ex){}
+            } catch (IOException ex){
+                // Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save file: " + ex.getMessage());
+                // alert.showAndWait();
+            }
         });
         
         // for the appbar
