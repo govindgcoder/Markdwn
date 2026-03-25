@@ -291,26 +291,32 @@ public class MainApp extends Application {
                 Stage loadingDialog = createLoadingDialog(stage, "AI is processing...");
                 loadingDialog.show();
                 helper.getResponse(prompt)
-                      .thenAccept(resultVal -> {
-                          // This block automatically runs when the network call finishes
-                          Platform.runLater(() -> input.setText(resultVal));
-                          loadingDialog.close();
-                          // create new file and paste result
-                          sideBar.setDisable(false);
-                          appBar.setDisable(false);
-                          String name = topic+".md";
-                          currentFileLabel.setText(name);
-                          Path newFilePath = dirPath.resolve(name);
-                          try {
-                          Files.writeString(newFilePath, input.getText());
-                          } catch (IOException ex){
-                              Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save file: " + ex.getMessage());
-                              alert.showAndWait();
-                          }
-                          
-                          currentActiveFile = newFilePath;
-                          loadDirectory(dirPath, sideBar);
-                      })
+                .thenAccept(resultVal -> {
+                    // 1. Do the heavy lifting (File IO) on the background thread first
+                    String name = topic + ".md";
+                    Path newFilePath = dirPath.resolve(name);
+                    try {
+                        // Save the raw text we got from the AI directly
+                        Files.writeString(newFilePath, resultVal); 
+                    } catch (IOException ex) {
+                        Platform.runLater(() -> {
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save file: " + ex.getMessage());
+                            alert.showAndWait();
+                        });
+                    }
+                
+                    // 2. Safely push ALL UI updates to the Main Thread
+                    Platform.runLater(() -> {
+                        input.setText(resultVal);
+                        loadingDialog.close();
+                        sideBar.setDisable(false);
+                        appBar.setDisable(false);
+                        currentFileLabel.setText(name);
+                        
+                        currentActiveFile = newFilePath;
+                        loadDirectory(dirPath, sideBar); // This modifies the TreeView, so it MUST be in runLater!
+                    });
+                })
                       .exceptionally(ex -> {
                           // This catches any network/JSON errors seamlessly
                           Platform.runLater(() -> {
