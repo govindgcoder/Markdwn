@@ -12,7 +12,10 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+
 import java.util.Optional;
 import javafx.scene.web.WebView;
 import java.io.IOException;
@@ -26,6 +29,11 @@ import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 
 public class MainApp extends Application {
+
+    private Label pomodoroStatus = new Label("");
+    private int pomodoroTimeLeft = 0;
+
+    private int[] pomodoroState = {1, 1};
 
     private Path dirPath;
     private Path currentActiveFile;
@@ -56,7 +64,8 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        FileHelper fileHelper = new FileHelper();
+        // FileHelper fileHelper = new FileHelper();
+        Startup startup = new Startup();
         // sideBar
         ListView<String> sideBar = new ListView<>();
 
@@ -67,8 +76,9 @@ public class MainApp extends Application {
         WebView output = new WebView();
 
         // for set initial directory
-        File selectedDirectory = fileHelper.directorySelector(stage);
-    
+        // File selectedDirectory = fileHelper.directorySelector(stage);
+        File selectedDirectory = startup.DirSelect(stage);
+        
         if (selectedDirectory != null) {
             dirPath = Paths.get(selectedDirectory.getAbsolutePath());
             loadDirectory(dirPath, sideBar);
@@ -109,13 +119,29 @@ public class MainApp extends Application {
             } catch (IOException ex){}
         });
         
+        // Spacer
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        //Pomodoro
+        Button pomdoroBtn = new Button("Pomodoro");
+        pomdoroBtn.setOnAction(e -> {
+            Thread p = new Thread(() ->{
+
+            });
+        });
+        
         // for the appbar
         ToolBar appBar = new ToolBar(
             new Label("File name"),
             new Separator(),
             newBtn,
             new Separator(),
-            saveBtn
+            saveBtn,
+            new Separator(),
+            pomdoroBtn,
+            spacer,
+            pomodoroStatus
         );
 
         SplitPane splitPane = new SplitPane();
