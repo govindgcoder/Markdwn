@@ -10,46 +10,53 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.image.Image;
 
 public class Startup {
 
-    File selectedDirectory;
+    private File selectedDirectory;
 
-    File DirSelect(Stage stage){
-        // FileHelper fileHelper = new FileHelper();
-
-        
-
-        // return directoryChooser.showDialog(stage);
-
+    public File DirSelect(Stage ownerStage) {
         Stage popup = new Stage();
-        popup.initModality(Modality.APPLICATION_MODAL); // blocks interaction with other windows
-        popup.initOwner(stage);
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.initOwner(ownerStage);
         popup.setTitle("Markdwn");
 
         Label message = new Label("Welcome! Select a folder to begin.");
-
-        // final File selectedDirectory;
         Button startBtn = new Button("Open Folder");
-        startBtn.setOnAction(e -> {
-            popup.close(); // kill the popup
-            DirectoryChooser directoryChooser = new DirectoryChooser();
-            directoryChooser.setTitle("Open Folder");
 
-            // for set initial directory
-            directoryChooser.setInitialDirectory(
-                new File(System.getProperty("user.home"))
-            );
-            selectedDirectory = directoryChooser.showDialog(stage); // start your function
-        });
-        
         VBox layout = new VBox(20, message, startBtn);
         layout.setAlignment(Pos.CENTER);
         layout.setStyle("-fx-padding: 40;");
 
-        popup.setScene(new Scene(layout, 350, 200));
-        popup.showAndWait(); // blocks until popup is closed
+        Scene scene = new Scene(layout, 350, 200);
 
+        try {
+            String css = getClass().getResource("/style.css").toExternalForm();
+            scene.getStylesheets().add(css);
+        } catch (Exception e) {
+            System.err.println("Warning: style.css not found in resources folder.");
+        }
+
+        try {
+            Image appIcon = new Image(getClass().getResourceAsStream("/icon.png"));
+            popup.getIcons().add(appIcon);
+        } catch (Exception e) {
+            System.err.println("Warning: icon.png not found in resources folder.");
+        }
+
+        popup.setScene(scene);
+
+        startBtn.setOnAction(e -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setTitle("Open Folder");
+            directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+
+            selectedDirectory = directoryChooser.showDialog(ownerStage);
+            popup.close();
+        });
+
+        popup.showAndWait();
         return selectedDirectory;
     }
 }

@@ -31,6 +31,7 @@ import javafx.util.Duration;
 import java.util.List;
 import java.util.Map;
 
+import javafx.scene.image.Image;
 
 public class MainApp extends Application {
     
@@ -372,10 +373,25 @@ public class MainApp extends Application {
         root.setCenter(splitPane);
 
         // Scene is container for all elements
-        Scene scene = new Scene(root, 1200, 600);
-        stage.setTitle("Markdwn");
-        stage.setScene(scene);
-        stage.show();
+                Scene scene = new Scene(root, 1200, 600);
+                                
+                try {
+                    String css = getClass().getResource("/style.css").toExternalForm();
+                    scene.getStylesheets().add(css);
+                } catch (NullPointerException e) {
+                    System.err.println("Warning: style.css not found in resources folder.");
+                }
+        
+                try {
+                    javafx.scene.image.Image appIcon = new javafx.scene.image.Image(getClass().getResourceAsStream("/icon.png"));
+                    stage.getIcons().add(appIcon);
+                } catch (NullPointerException e) {
+                    System.err.println("Warning: icon.png not found in resources folder.");
+                }
+                        
+                stage.setTitle("Markdwn");
+                stage.setScene(scene);
+                stage.show();
     }
 
     public static void main(String[] args) {
