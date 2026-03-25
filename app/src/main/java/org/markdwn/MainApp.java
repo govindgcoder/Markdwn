@@ -60,6 +60,9 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
+        // for filename on appbar
+        Label currentFileLabel = new Label("No File Selected");
+        
         FileHelper fileHelper = new FileHelper();
         // sideBar
         ListView<String> sideBar = new ListView<>();
@@ -82,6 +85,8 @@ public class MainApp extends Application {
         }
         
         // button functionalities
+        ToolBar appBar = new ToolBar(); 
+        
         Button newBtn = new Button("New");
         newBtn.setOnAction(e -> {
             TextInputDialog dialog = new TextInputDialog("new file");
@@ -94,12 +99,13 @@ public class MainApp extends Application {
             // Process the result if it is present (user clicked 'OK')
             result.ifPresent(name -> {
                 if (!name.endsWith(".md")) { name += ".md"; }
+                currentFileLabel.setText(name);
                 Path newFilePath = dirPath.resolve(name);
                 try {
                 Files.writeString(newFilePath, "");
-                } catch (IOException ev){
-                    // Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save file: " + ex.getMessage());
-                    // alert.showAndWait();
+                } catch (IOException ex){
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save file: " + ex.getMessage());
+                    alert.showAndWait();
                 }
                 
                 currentActiveFile = newFilePath;
@@ -155,38 +161,47 @@ public class MainApp extends Application {
                 GeminiHelper helper = new GeminiHelper(apiKey);
                 String prompt = "Create a detailed roadmap in markdown format (no emojies, pure markdown format) for learning: " + topic;
                 // asynchronous helper call uses Java's built-in ForkJoin pool.
+                sideBar.setDisable(true);
+                input.setText("Loading... Please Wait!");
+                appBar.setDisable(true);
                 helper.getResponse(prompt)
                       .thenAccept(resultVal -> {
                           // This block automatically runs when the network call finishes
                           Platform.runLater(() -> input.setText(resultVal));
+                          // create new file and paste result
+                          sideBar.setDisable(false);
+                          appBar.setDisable(false);
+                          String name = topic+".md";
+                          currentFileLabel.setText(name);
+                          Path newFilePath = dirPath.resolve(name);
+                          try {
+                          Files.writeString(newFilePath, input.getText());
+                          } catch (IOException ex){
+                              Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save file: " + ex.getMessage());
+                              alert.showAndWait();
+                          }
+                          
+                          currentActiveFile = newFilePath;
+                          loadDirectory(dirPath, sideBar);
                       })
                       .exceptionally(ex -> {
                           // This catches any network/JSON errors seamlessly
                           Platform.runLater(() -> {
                               Alert alert = new Alert(Alert.AlertType.ERROR, "API Error: " + ex.getMessage());
                               alert.showAndWait();
+                              sideBar.setDisable(false);
+                              appBar.setDisable(false);
                           });
                           return null;
                     });
-                // create new file and paste result
-                String name = topic+".md";
-                Path newFilePath = dirPath.resolve(name);
-                try {
-                Files.writeString(newFilePath, "");
-                } catch (IOException ev){
-                    // Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save file: " + ex.getMessage());
-                    // alert.showAndWait();
-                }
                 
-                currentActiveFile = newFilePath;
-                loadDirectory(dirPath, sideBar);
             });
         });
 
         
         // for the appbar
-        ToolBar appBar = new ToolBar(
-            new Label("File name"),
+        appBar.getItems().addAll(
+            currentFileLabel,
             new Separator(),
             newBtn,
             new Separator(),
@@ -216,6 +231,7 @@ public class MainApp extends Application {
                 if (newVal != null) {
                     try {
                         // select the file
+                        currentFileLabel.setText(newVal);
                         Path filePath = dirPath.resolve(newVal);
                         currentActiveFile = filePath;
                         // get content
