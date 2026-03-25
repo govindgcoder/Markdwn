@@ -30,6 +30,8 @@ import javafx.util.Duration;
 
 
 public class MainApp extends Application {
+
+    public volatile boolean pomoRunning = false;
     
     private String apiKey = null;
     private Pomodoro pomo = new Pomodoro();
@@ -39,9 +41,6 @@ public class MainApp extends Application {
     private MenuItem pomoReset = new MenuItem("Reset");
 
     private Label pomoLabel = new Label("");
-    private int pomoSleep = 0;
-
-    private int[] pomodoroState = {1, 1}; // sleep time, stage
 
     private Path dirPath;
     private Path currentActiveFile;
@@ -221,13 +220,46 @@ public class MainApp extends Application {
 
         // Pomodoro
         MenuButton menuButton = new MenuButton("Pomodoro Timer", null, pomoStart, pomoStop, pomoReset);
+        // pomoStart.setOnAction(e -> {
+        //     Thread pstart = new Thread(() -> {
+        //         pomo.runPomo(pomoLabel);
+        //     });
+        //     pstart.setDaemon(true);
+        //     pstart.start();
+        //     pomoStop.setDisable(false);
+        // });
+
+        // pomoStop.setOnAction(event -> {
+        //     pomo.stop(); // This kills the loop inside runPomo
+        //     pomo.reset(pomoLabel);
+        //     pomoRunning = false;
+        // });
+
+        // pomoReset.setOnAction(e -> {
+        //     pomo.reset(pomoLabel);
+        //     pomoRunning = false;
+        //     pomoReset.setDisable(true);
+        //     pomoStop.setDisable(true);
+        // });
+
         pomoStart.setOnAction(e -> {
-            pomoStop.setDisable(false);
-            pomodoroState = pomo.pomodoroGetTimeSec(pomodoroState[0], pomodoroState[1]);
-            Thread pstart = new Thread(() -> {
-                int a = 0;
-            });
+            if (!pomo.isRunning) { // Prevent multiple threads from starting
+                pomoStop.setDisable(false);
+                Thread pstart = new Thread(() -> pomo.runPomo(pomoLabel));
+                pstart.setDaemon(true);
+                pstart.start();
+            }
         });
+
+        pomoStop.setOnAction(event -> {
+            pomo.stop();
+            pomoReset.setDisable(false);
+        });
+
+        pomoReset.setOnAction(e -> {
+            pomo.reset(pomoLabel);
+        });
+
         // for the appbar
         appBar.getItems().addAll(
             currentFileLabel,
