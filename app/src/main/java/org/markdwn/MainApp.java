@@ -12,7 +12,10 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+
 import java.util.Optional;
 import javafx.scene.web.WebView;
 import java.io.IOException;
@@ -25,11 +28,20 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 
-import org.markdwn.GeminiHelper;
 
 public class MainApp extends Application {
     
     private String apiKey = null;
+    private Pomodoro pomo = new Pomodoro();
+
+    private MenuItem pomoStart = new MenuItem("Start");
+    private MenuItem pomoStop = new MenuItem("Stop");
+    private MenuItem pomoReset = new MenuItem("Reset");
+
+    private Label pomoLabel = new Label("");
+    private int pomoSleep = 0;
+
+    private int[] pomodoroState = {1, 1}; // sleep time, stage
 
     private Path dirPath;
     private Path currentActiveFile;
@@ -60,10 +72,14 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
+        pomoStop.setDisable(true);
+        pomoReset.setDisable(true);
+        // FileHelper fileHelper = new FileHelper();
+        Startup startup = new Startup();
         // for filename on appbar
         Label currentFileLabel = new Label("No File Selected");
         
-        FileHelper fileHelper = new FileHelper();
+
         // sideBar
         ListView<String> sideBar = new ListView<>();
 
@@ -74,8 +90,9 @@ public class MainApp extends Application {
         WebView output = new WebView();
 
         // for set initial directory
-        File selectedDirectory = fileHelper.directorySelector(stage);
-    
+        // File selectedDirectory = fileHelper.directorySelector(stage);
+        File selectedDirectory = startup.DirSelect(stage);
+        
         if (selectedDirectory != null) {
             dirPath = Paths.get(selectedDirectory.getAbsolutePath());
             loadDirectory(dirPath, sideBar);
@@ -125,6 +142,10 @@ public class MainApp extends Application {
                 // alert.showAndWait();
             }
         });
+        
+        // Spacer
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
         
         //for ai functionalitie
         Button setAPIKeyBtn = new Button("Set API Key");
@@ -198,7 +219,15 @@ public class MainApp extends Application {
             });
         });
 
-        
+        // Pomodoro
+        MenuButton menuButton = new MenuButton("Pomodoro Timer", null, pomoStart, pomoStop, pomoReset);
+        pomoStart.setOnAction(e -> {
+            pomoStop.setDisable(false);
+            pomodoroState = pomo.pomodoroGetTimeSec(pomodoroState[0], pomodoroState[1]);
+            Thread pstart = new Thread(() -> {
+                int a = 0;
+            });
+        });
         // for the appbar
         appBar.getItems().addAll(
             currentFileLabel,
@@ -209,7 +238,10 @@ public class MainApp extends Application {
             new Separator(),
             setAPIKeyBtn,
             nlpBtn,
-            roadmapBtn
+            roadmapBtn,
+            spacer,
+            menuButton,
+            pomoLabel
         );
 
         SplitPane splitPane = new SplitPane();
