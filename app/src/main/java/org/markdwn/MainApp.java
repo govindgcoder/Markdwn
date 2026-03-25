@@ -1,6 +1,7 @@
 package org.markdwn;
 
 // all imports
+import javafx.scene.text.Font;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -98,6 +99,9 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
+        Font.loadFont(getClass().getResourceAsStream("/IBM_Plex_Serif/IBMPlexSerif-SemiBold.ttf"), 10);
+        Font.loadFont(getClass().getResourceAsStream("/Inter_Tight/static/InterTight-Black.ttf"), 10);
+
         pomoStop.setDisable(true);
         pomoReset.setDisable(true);
         // FileHelper fileHelper = new FileHelper();
