@@ -1,6 +1,7 @@
 .root {
     -fx-background-color: #f3f4f6;
     -fx-font-family: "IBM Plex Serif SemiBold";
+    color: black;
 }
 
 .tool-bar {
