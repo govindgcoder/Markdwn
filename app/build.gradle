@@ -15,7 +15,7 @@ javafx {
 
 // application main file
 application {
-    mainClass = 'org.markdwn.MainApp'
+    mainClass = 'org.markdwn.Launcher'
 }
 
 dependencies {

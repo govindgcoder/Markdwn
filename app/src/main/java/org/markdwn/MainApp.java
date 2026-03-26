@@ -51,25 +51,47 @@ public class MainApp extends Application {
     private Path currentActiveFile;
     
     private Stage createLoadingDialog(Stage owner, String message) {
-        Stage loadingStage = new Stage();
-        loadingStage.initOwner(owner);
-        loadingStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
-        loadingStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
-    
-        ProgressIndicator spinner = new ProgressIndicator();
+            Stage loadingStage = new Stage();
+            loadingStage.initOwner(owner);
+            loadingStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            
+            // CRITICAL: Set stage to transparent so we can draw true rounded corners
+            loadingStage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
         
-        Label msgLabel = new Label(message);
+            ProgressIndicator spinner = new ProgressIndicator();
+            spinner.setPrefSize(40, 40); // Lock the size so it looks sharp
         
-        javafx.scene.layout.VBox vbox = new javafx.scene.layout.VBox(10, spinner, msgLabel);
-        vbox.setStyle("-fx-padding: 20; -fx-background-color: white; -fx-border-color: gray; -fx-border-width: 2;");
-        vbox.setAlignment(javafx.geometry.Pos.CENTER);
-    
-        Scene scene = new Scene(vbox);
-        loadingStage.setScene(scene);
+            Label msgLabel = new Label(message);
+            // Modern font styling for the label
+            msgLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #374151;");
         
-        return loadingStage;
-    }
-
+            javafx.scene.layout.VBox vbox = new javafx.scene.layout.VBox(15, spinner, msgLabel);
+            
+            // Premium rounded styling
+            vbox.setStyle(
+                "-fx-padding: 30 40 30 40; " +
+                "-fx-background-color: #ffffff; " +
+                "-fx-background-radius: 12; " +
+                "-fx-border-radius: 12; " +
+                "-fx-border-color: #e5e7eb; " +
+                "-fx-border-width: 1;"
+            );
+            vbox.setAlignment(javafx.geometry.Pos.CENTER);
+            
+            // Add a soft drop shadow so it floats above the main UI
+            javafx.scene.effect.DropShadow shadow = new javafx.scene.effect.DropShadow();
+            shadow.setColor(javafx.scene.paint.Color.rgb(0, 0, 0, 0.15));
+            shadow.setRadius(20);
+            vbox.setEffect(shadow);
+        
+            Scene scene = new Scene(vbox);
+            // CRITICAL: Make the scene background transparent
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            
+            loadingStage.setScene(scene);
+        
+            return loadingStage;
+        }
     private void loadDirectory(Path dirPath, TreeView<String> sideBar) {
         sideBar.getRoot().getChildren().clear();
 
@@ -269,26 +291,32 @@ public class MainApp extends Application {
                 Stage loadingDialog = createLoadingDialog(stage, "AI is processing...");
                 loadingDialog.show();
                 helper.getResponse(prompt)
-                      .thenAccept(resultVal -> {
-                          // This block automatically runs when the network call finishes
-                          Platform.runLater(() -> input.setText(resultVal));
-                          loadingDialog.close();
-                          // create new file and paste result
-                          sideBar.setDisable(false);
-                          appBar.setDisable(false);
-                          String name = topic+".md";
-                          currentFileLabel.setText(name);
-                          Path newFilePath = dirPath.resolve(name);
-                          try {
-                          Files.writeString(newFilePath, input.getText());
-                          } catch (IOException ex){
-                              Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save file: " + ex.getMessage());
-                              alert.showAndWait();
-                          }
-                          
-                          currentActiveFile = newFilePath;
-                          loadDirectory(dirPath, sideBar);
-                      })
+                .thenAccept(resultVal -> {
+                    // 1. Do the heavy lifting (File IO) on the background thread first
+                    String name = topic + ".md";
+                    Path newFilePath = dirPath.resolve(name);
+                    try {
+                        // Save the raw text we got from the AI directly
+                        Files.writeString(newFilePath, resultVal); 
+                    } catch (IOException ex) {
+                        Platform.runLater(() -> {
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save file: " + ex.getMessage());
+                            alert.showAndWait();
+                        });
+                    }
+                
+                    // 2. Safely push ALL UI updates to the Main Thread
+                    Platform.runLater(() -> {
+                        input.setText(resultVal);
+                        loadingDialog.close();
+                        sideBar.setDisable(false);
+                        appBar.setDisable(false);
+                        currentFileLabel.setText(name);
+                        
+                        currentActiveFile = newFilePath;
+                        loadDirectory(dirPath, sideBar); // This modifies the TreeView, so it MUST be in runLater!
+                    });
+                })
                       .exceptionally(ex -> {
                           // This catches any network/JSON errors seamlessly
                           Platform.runLater(() -> {
